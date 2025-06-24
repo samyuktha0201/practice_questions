@@ -1,0 +1,12 @@
+-- Change the product_id here
+WITH regions_with_product AS (
+    SELECT DISTINCT c.region
+    FROM customers c
+    JOIN orders o ON c.customer_id = o.customer_id
+    JOIN order_details od ON o.order_id = od.order_id
+    WHERE od.product_id = 202
+)
+
+SELECT DISTINCT region
+FROM customers
+WHERE region NOT IN (SELECT region FROM regions_with_product);
