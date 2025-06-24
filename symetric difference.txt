@@ -1,0 +1,13 @@
+# Read input
+M = int(input())
+set_M = set(map(int, input().split()))
+
+N = int(input())
+set_N = set(map(int, input().split()))
+
+# Compute symmetric difference using '^' operator
+symmetric_diff = set_M ^ set_N
+
+# Print each element in ascending order
+for num in sorted(symmetric_diff):
+    print(num)

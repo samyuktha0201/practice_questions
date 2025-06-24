@@ -1,0 +1,9 @@
+def wrap_string(s, width):
+    for i in range(0, len(s), width):
+        print(s[i:i+width])
+
+# Example input
+S = input("Enter the string: ")
+W = int(input("Enter the width: "))
+
+wrap_string(S, W)

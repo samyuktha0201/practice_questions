@@ -1,0 +1,58 @@
+Question 1: Find Employees Earning More Than Their Department’s Average Salary
+SELECT e.emp_id, e.emp_name, e.salary, e.dept_id
+FROM employees e
+JOIN (
+    SELECT dept_id, AVG(salary) AS avg_salary
+    FROM employees
+    GROUP BY dept_id
+) dept_avg
+ON e.dept_id = dept_avg.dept_id
+WHERE e.salary > dept_avg.avg_salary;
+
+Question 2: Find Employees Who Worked on All Projects in Their Department
+
+
+WITH dept_project_count AS (
+    SELECT pa.dept_id, COUNT(DISTINCT pa.project_id) AS total_projects
+    FROM project_assignments pa
+    GROUP BY pa.dept_id
+),
+
+
+emp_project_count AS (
+    SELECT e.emp_id, e.dept_id, COUNT(DISTINCT p.project_id) AS emp_projects
+    FROM employees e
+    JOIN projects p ON e.emp_id = p.emp_id
+    JOIN project_assignments pa ON p.project_id = pa.project_id AND pa.dept_id = e.dept_id
+    GROUP BY e.emp_id, e.dept_id
+)
+
+
+SELECT e.emp_id, e.emp_name, e.dept_id
+FROM emp_project_count epc
+JOIN dept_project_count dpc ON epc.dept_id = dpc.dept_id
+JOIN employees e ON e.emp_id = epc.emp_id
+WHERE epc.emp_projects = dpc.total_projects;
+
+Question 3: Find the Highest-Paid Employee in Each Department Who Started After 2020
+
+SELECT e.emp_id, e.emp_name, e.salary, e.dept_id, e.start_date
+FROM employees e
+JOIN (
+    SELECT dept_id, MAX(salary) AS max_salary
+    FROM employees
+    WHERE start_date > '2020-12-31'
+    GROUP BY dept_id
+) dept_max
+ON e.dept_id = dept_max.dept_id
+AND e.salary = dept_max.max_salary
+WHERE e.start_date > '2020-12-31';
+
+
+Question 4: Find Departments Where All Employees Earn Above a Certain Threshold
+
+SELECT dept_id
+FROM employees
+GROUP BY dept_id
+HAVING MIN(salary) > 50000;
+

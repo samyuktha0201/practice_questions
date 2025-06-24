@@ -1,0 +1,91 @@
+Question 1: Find Customers Whose Total Order Amount Exceeds the Average Order Amount in Their Region
+
+-- Step 1 & 2: Total order amount per customer with region
+WITH customer_totals AS (
+    SELECT 
+        c.customer_id,
+        c.customer_name,
+        c.region,
+        SUM(o.total_amount) AS total_order_amount
+    FROM customers c
+    JOIN orders o ON c.customer_id = o.customer_id
+    GROUP BY c.customer_id, c.customer_name, c.region
+),
+
+-- Step 3: Average total per region
+region_averages AS (
+    SELECT 
+        region,
+        AVG(total_order_amount) AS avg_region_order
+    FROM customer_totals
+    GROUP BY region
+)
+
+-- Step 4: Compare and get result
+SELECT 
+    ct.customer_id,
+    ct.customer_name,
+    ct.region,
+    ct.total_order_amount,
+    ra.avg_region_order
+FROM customer_totals ct
+JOIN region_averages ra ON ct.region = ra.region
+WHERE ct.total_order_amount > ra.avg_region_order;
+
+
+Question 2: Find Orders Containing Products from All Categories
+
+-- Step 1: Get number of distinct categories in the system
+WITH total_categories AS (
+    SELECT COUNT(DISTINCT category) AS cat_count
+    FROM products
+),
+
+-- Step 2: Get number of distinct categories per order
+order_category_counts AS (
+    SELECT od.order_id, COUNT(DISTINCT p.category) AS order_cat_count
+    FROM order_details od
+    JOIN products p ON od.product_id = p.product_id
+    GROUP BY od.order_id
+)
+
+-- Step 3: Select orders where category count matches total
+SELECT occ.order_id
+FROM order_category_counts occ
+JOIN total_categories tc ON occ.order_cat_count = tc.cat_count;
+
+
+Question 3: Find the Most Expensive Product Ordered by Each Customer After a Specific Date
+WITH customer_orders AS (
+    SELECT 
+        c.customer_id,
+        c.customer_name,
+        o.order_id,
+        od.product_id,
+        od.unit_price,
+        o.order_date
+    FROM customers c
+    JOIN orders o ON c.customer_id = o.customer_id
+    JOIN order_details od ON o.order_id = od.order_id
+    WHERE o.order_date > '2023-01-31'  -- specific date filter
+),
+
+ranked_products AS (
+    SELECT 
+        co.customer_id,
+        co.customer_name,
+        co.product_id,
+        co.unit_price,
+        ROW_NUMBER() OVER (PARTITION BY co.customer_id ORDER BY co.unit_price DESC) AS rank
+    FROM customer_orders co
+)
+
+-- Select highest-priced product (rank = 1) per customer
+SELECT 
+    rp.customer_id,
+    rp.customer_name,
+    p.product_name,
+    rp.unit_price
+FROM ranked_products rp
+JOIN products p ON rp.product_id = p.product_id
+WHERE rp.rank = 1;

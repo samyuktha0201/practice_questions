@@ -1,0 +1,22 @@
+import string
+
+def print_rangoli(size):
+    alphabet = string.ascii_lowercase
+    lines = []
+
+    for i in range(size):
+        # Create left part: e.g. ['e', 'd', 'c'] when size = 5, i = 2
+        left = alphabet[size-1 : size-1-i : -1]
+        # Create right part: e.g. ['c', 'd', 'e']
+        right = alphabet[size-1-i : size]
+        # Combine with '-'
+        row = '-'.join(left + right)
+        # Center-align the row
+        lines.append(row.center(4 * size - 3, '-'))
+
+    # Print top half + bottom half (excluding center duplicated)
+    print('\n'.join(lines + lines[-2::-1]))
+
+# Example usage
+n = int(input("Enter the size of the Rangoli: "))
+print_rangoli(n)
