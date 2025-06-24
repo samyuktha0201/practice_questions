@@ -1,0 +1,25 @@
+def full_justify(words, maxWidth):
+    res = []
+    line = []
+    num_of_letters = 0
+
+    for word in words:
+        if num_of_letters + len(word) + len(line) > maxWidth:
+            spaces_to_distribute = maxWidth - num_of_letters
+            if len(line) == 1:
+                res.append(line[0] + ' ' * spaces_to_distribute)
+            else:
+                spaces_between_words, extra_spaces = divmod(spaces_to_distribute, len(line) - 1)
+                for i in range(extra_spaces):
+                    line[i] += ' '
+                res.append((' ' * spaces_between_words).join(line))
+            line = []
+            num_of_letters = 0
+        line.append(word)
+        num_of_letters += len(word)
+
+    last_line = ' '.join(line)
+    last_line += ' ' * (maxWidth - len(last_line))
+    res.append(last_line)
+
+    return res
